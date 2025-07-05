@@ -8,33 +8,50 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 240 20% 98%;
+    --foreground: 213 31% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 213 31% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 213 31% 20%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 213 94% 68%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 146 38% 69%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 217 32% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 213 94% 68%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 217 32% 91%;
+    --input: 217 32% 91%;
+    --ring: 213 94% 68%;
+
+    /* Educational theme colors */
+    --education-blue: 213 94% 68%;
+    --education-green: 146 38% 69%;
+    --education-light: 213 100% 96%;
+    --education-dark: 213 31% 20%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--education-blue)), hsl(var(--education-green)));
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(var(--education-light)));
+    
+    /* Shadows */
+    --shadow-elegant: 0 10px 30px -10px hsl(var(--education-blue) / 0.2);
+    --shadow-soft: 0 4px 12px -2px hsl(var(--education-blue) / 0.1);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --radius: 0.5rem;
 
