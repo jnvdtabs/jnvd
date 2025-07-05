@@ -8,50 +8,56 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 240 20% 98%;
-    --foreground: 213 31% 20%;
+    /* Netflix-inspired dark theme */
+    --background: 220 13% 9%;
+    --foreground: 0 0% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 213 31% 20%;
+    --card: 220 13% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 213 31% 20%;
+    --popover: 220 13% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 213 94% 68%;
+    --primary: 0 72% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 146 38% 69%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 220 13% 18%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 217 32% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 13% 15%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 213 94% 68%;
+    --accent: 0 72% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 217 32% 91%;
-    --input: 217 32% 91%;
-    --ring: 213 94% 68%;
+    --border: 220 13% 20%;
+    --input: 220 13% 18%;
+    --ring: 0 72% 55%;
 
-    /* Educational theme colors */
-    --education-blue: 213 94% 68%;
-    --education-green: 146 38% 69%;
-    --education-light: 213 100% 96%;
-    --education-dark: 213 31% 20%;
+    /* Netflix theme colors */
+    --netflix-red: 0 72% 55%;
+    --netflix-dark: 220 13% 9%;
+    --netflix-gray: 220 13% 15%;
+    --netflix-light-gray: 220 13% 25%;
+    --netflix-text: 0 0% 95%;
+    --netflix-muted: 0 0% 65%;
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--education-blue)), hsl(var(--education-green)));
-    --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(var(--education-light)));
+    --gradient-primary: linear-gradient(135deg, hsl(var(--netflix-red)), hsl(var(--netflix-red) / 0.8));
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(var(--netflix-gray)));
+    --gradient-hero: linear-gradient(180deg, hsl(var(--netflix-dark)) 0%, hsl(var(--netflix-gray)) 100%);
     
     /* Shadows */
-    --shadow-elegant: 0 10px 30px -10px hsl(var(--education-blue) / 0.2);
-    --shadow-soft: 0 4px 12px -2px hsl(var(--education-blue) / 0.1);
+    --shadow-elegant: 0 10px 30px -10px hsl(var(--netflix-red) / 0.3);
+    --shadow-soft: 0 4px 12px -2px rgba(0, 0, 0, 0.4);
+    --shadow-netflix: 0 8px 32px rgba(0, 0, 0, 0.6);
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-netflix: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     --radius: 0.5rem;
 

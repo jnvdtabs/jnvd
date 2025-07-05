@@ -49,86 +49,86 @@ const TeacherDashboard = () => {
   };
 
   return (
-    <Layout userRole="teacher">
+    <Layout userRole="admin">
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-education-dark mb-2">Teacher Dashboard</h1>
-          <p className="text-muted-foreground">Manage attendance for your classes</p>
+          <h1 className="text-3xl font-bold text-netflix-text mb-2">Teacher View</h1>
+          <p className="text-netflix-muted">Manage attendance for your classes</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-gradient-card shadow-soft border-0">
+          <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Students</p>
-                  <p className="text-2xl font-bold text-education-dark">{totalCount}</p>
+                  <p className="text-sm font-medium text-netflix-muted">Total Students</p>
+                  <p className="text-2xl font-bold text-netflix-text">{totalCount}</p>
                 </div>
-                <Users className="h-8 w-8 text-education-blue" />
+                <Users className="h-8 w-8 text-netflix-red" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-card shadow-soft border-0">
+          <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Present Today</p>
-                  <p className="text-2xl font-bold text-education-green">{presentCount}</p>
+                  <p className="text-sm font-medium text-netflix-muted">Present Today</p>
+                  <p className="text-2xl font-bold text-green-400">{presentCount}</p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-education-green" />
+                <CheckCircle className="h-8 w-8 text-green-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-card shadow-soft border-0">
+          <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Absent Today</p>
-                  <p className="text-2xl font-bold text-destructive">{totalCount - presentCount}</p>
+                  <p className="text-sm font-medium text-netflix-muted">Absent Today</p>
+                  <p className="text-2xl font-bold text-red-400">{totalCount - presentCount}</p>
                 </div>
-                <XCircle className="h-8 w-8 text-destructive" />
+                <XCircle className="h-8 w-8 text-red-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-card shadow-soft border-0">
+          <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Attendance %</p>
-                  <p className="text-2xl font-bold text-primary">{attendancePercentage}%</p>
+                  <p className="text-sm font-medium text-netflix-muted">Attendance %</p>
+                  <p className="text-2xl font-bold text-netflix-red">{attendancePercentage}%</p>
                 </div>
-                <BookOpen className="h-8 w-8 text-primary" />
+                <BookOpen className="h-8 w-8 text-netflix-red" />
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Attendance Management */}
-        <Card className="bg-gradient-card shadow-soft border-0">
+        <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <CardTitle className="text-education-dark">Mark Attendance</CardTitle>
-                <CardDescription>Select date and mark attendance for {selectedClass}</CardDescription>
+                <CardTitle className="text-netflix-text">Mark Attendance</CardTitle>
+                <CardDescription className="text-netflix-muted">Select date and mark attendance for {selectedClass}</CardDescription>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-netflix-muted" />
                   <Input
                     type="date"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-auto"
+                    className="w-auto bg-netflix-dark border-netflix-light-gray text-netflix-text"
                   />
                 </div>
                 <Button 
                   onClick={handleSaveAttendance}
-                  className="bg-gradient-primary hover:opacity-90 text-white shadow-soft"
+                  className="bg-netflix-red hover:bg-netflix-red/90 text-white shadow-netflix transition-netflix"
                 >
                   Save Attendance
                 </Button>
@@ -140,12 +140,12 @@ const TeacherDashboard = () => {
             {/* Search */}
             <div className="mb-6">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-netflix-muted" />
                 <Input
                   placeholder="Search students by name or roll number..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-netflix-dark border-netflix-light-gray text-netflix-text"
                 />
               </div>
             </div>
@@ -155,7 +155,7 @@ const TeacherDashboard = () => {
               {filteredStudents.map((student) => (
                 <div 
                   key={student.id}
-                  className="flex items-center justify-between p-4 bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow"
+                  className="flex items-center justify-between p-4 bg-netflix-light-gray/10 rounded-lg border border-netflix-light-gray/30 hover:bg-netflix-light-gray/20 transition-netflix"
                 >
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
@@ -168,16 +168,20 @@ const TeacherDashboard = () => {
                       />
                     </div>
                     <div>
-                      <p className="font-medium text-education-dark">{student.name}</p>
-                      <p className="text-sm text-muted-foreground">Roll No: {student.rollNo}</p>
+                      <p className="font-medium text-netflix-text">{student.name}</p>
+                      <p className="text-sm text-netflix-muted">Roll No: {student.rollNo}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-3">
-                    <Badge variant={student.present ? "default" : "destructive"}>
+                    <Badge variant={student.present ? "default" : "destructive"} className={
+                      student.present 
+                        ? "bg-green-500/20 text-green-400 border-green-500/30" 
+                        : "bg-red-500/20 text-red-400 border-red-500/30"
+                    }>
                       {student.present ? 'Present' : 'Absent'}
                     </Badge>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-netflix-muted">
                       {student.class}-{student.section}
                     </span>
                   </div>

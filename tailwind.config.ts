@@ -62,21 +62,26 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				'education-blue': 'hsl(var(--education-blue))',
-				'education-green': 'hsl(var(--education-green))',
-				'education-light': 'hsl(var(--education-light))',
-				'education-dark': 'hsl(var(--education-dark))'
+				'netflix-red': 'hsl(var(--netflix-red))',
+				'netflix-dark': 'hsl(var(--netflix-dark))',
+				'netflix-gray': 'hsl(var(--netflix-gray))',
+				'netflix-light-gray': 'hsl(var(--netflix-light-gray))',
+				'netflix-text': 'hsl(var(--netflix-text))',
+				'netflix-muted': 'hsl(var(--netflix-muted))'
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-card': 'var(--gradient-card)'
+				'gradient-card': 'var(--gradient-card)',
+				'gradient-hero': 'var(--gradient-hero)'
 			},
 			boxShadow: {
 				'elegant': 'var(--shadow-elegant)',
-				'soft': 'var(--shadow-soft)'
+				'soft': 'var(--shadow-soft)',
+				'netflix': 'var(--shadow-netflix)'
 			},
 			transitionTimingFunction: {
-				'smooth': 'var(--transition-smooth)'
+				'smooth': 'var(--transition-smooth)',
+				'netflix': 'var(--transition-netflix)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

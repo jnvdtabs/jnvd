@@ -2,18 +2,30 @@ import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Users, Database, Mail, FileDown, UserPlus, BookOpen } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Settings, Users, Database, Mail, FileDown, UserPlus, BookOpen, Plus, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 const AdminDashboard = () => {
   const { toast } = useToast();
+  const [showAddTeacher, setShowAddTeacher] = useState(false);
+  const [newTeacher, setNewTeacher] = useState({ name: '', username: '', password: '', subject: '' });
 
   const systemStats = {
-    totalTeachers: 45,
+    totalTeachers: 12,
     totalClasses: 28,
     totalSections: 84,
-    dataSize: '2.4 GB'
+    totalStudents: 1250
   };
+
+  const teachersList = [
+    { id: 1, name: 'Dr. Priya Sharma', username: 'priya_math', subject: 'Mathematics', classes: 3 },
+    { id: 2, name: 'Mr. Rajesh Kumar', username: 'rajesh_sci', subject: 'Science', classes: 4 },
+    { id: 3, name: 'Ms. Kavya Nair', username: 'kavya_eng', subject: 'English', classes: 2 },
+    { id: 4, name: 'Mr. Arjun Singh', username: 'arjun_hist', subject: 'History', classes: 3 },
+  ];
 
   const recentExports = [
     { id: 1, type: 'Weekly Report', date: '2024-07-01', status: 'completed' },
@@ -35,189 +47,278 @@ const AdminDashboard = () => {
     });
   };
 
+  const handleAddTeacher = () => {
+    if (newTeacher.name && newTeacher.username && newTeacher.password) {
+      toast({
+        title: "Teacher Added",
+        description: `${newTeacher.name} has been added successfully.`,
+      });
+      setNewTeacher({ name: '', username: '', password: '', subject: '' });
+      setShowAddTeacher(false);
+    }
+  };
+
   return (
-    <Layout userRole="principal">
+    <Layout userRole="admin">
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-education-dark mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">System management and data administration</p>
+          <h1 className="text-3xl font-bold text-netflix-text mb-2">Admin Dashboard</h1>
+          <p className="text-netflix-muted">System management and user administration</p>
         </div>
 
         {/* System Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-gradient-card shadow-soft border-0">
+          <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Teachers</p>
-                  <p className="text-2xl font-bold text-education-dark">{systemStats.totalTeachers}</p>
+                  <p className="text-sm font-medium text-netflix-muted">Total Teachers</p>
+                  <p className="text-2xl font-bold text-netflix-text">{systemStats.totalTeachers}</p>
                 </div>
-                <Users className="h-8 w-8 text-education-blue" />
+                <Users className="h-8 w-8 text-netflix-red" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-card shadow-soft border-0">
+          <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Classes</p>
-                  <p className="text-2xl font-bold text-education-green">{systemStats.totalClasses}</p>
+                  <p className="text-sm font-medium text-netflix-muted">Total Students</p>
+                  <p className="text-2xl font-bold text-netflix-text">{systemStats.totalStudents}</p>
                 </div>
-                <BookOpen className="h-8 w-8 text-education-green" />
+                <BookOpen className="h-8 w-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-card shadow-soft border-0">
+          <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Sections</p>
-                  <p className="text-2xl font-bold text-primary">{systemStats.totalSections}</p>
+                  <p className="text-sm font-medium text-netflix-muted">Total Classes</p>
+                  <p className="text-2xl font-bold text-netflix-text">{systemStats.totalClasses}</p>
                 </div>
-                <Settings className="h-8 w-8 text-primary" />
+                <Settings className="h-8 w-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-card shadow-soft border-0">
+          <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Data Size</p>
-                  <p className="text-2xl font-bold text-education-dark">{systemStats.dataSize}</p>
+                  <p className="text-sm font-medium text-netflix-muted">Total Sections</p>
+                  <p className="text-2xl font-bold text-netflix-text">{systemStats.totalSections}</p>
                 </div>
-                <Database className="h-8 w-8 text-education-blue" />
+                <Database className="h-8 w-8 text-purple-500" />
               </div>
             </CardContent>
           </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Data Export */}
-          <Card className="bg-gradient-card shadow-soft border-0">
+          {/* Teacher Management */}
+          <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
             <CardHeader>
-              <CardTitle className="text-education-dark flex items-center gap-2">
-                <FileDown className="h-5 w-5" />
-                Data Export
-              </CardTitle>
-              <CardDescription>Export attendance data and reports</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-netflix-text flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Teacher Management
+                  </CardTitle>
+                  <CardDescription className="text-netflix-muted">Manage teacher accounts and permissions</CardDescription>
+                </div>
                 <Button 
-                  onClick={() => handleExportData('Weekly Report')}
-                  className="w-full justify-start bg-white hover:bg-gray-50 text-education-dark border shadow-sm"
-                  variant="outline"
+                  onClick={() => setShowAddTeacher(true)}
+                  className="bg-netflix-red hover:bg-netflix-red/90 text-white transition-netflix"
+                  size="sm"
                 >
-                  <FileDown className="h-4 w-4 mr-2" />
-                  Export Weekly Report
-                </Button>
-                
-                <Button 
-                  onClick={() => handleExportData('Monthly Analysis')}
-                  className="w-full justify-start bg-white hover:bg-gray-50 text-education-dark border shadow-sm"
-                  variant="outline"
-                >
-                  <FileDown className="h-4 w-4 mr-2" />
-                  Export Monthly Analysis
-                </Button>
-                
-                <Button 
-                  onClick={() => handleExportData('Complete Database')}
-                  className="w-full justify-start bg-white hover:bg-gray-50 text-education-dark border shadow-sm"
-                  variant="outline"
-                >
-                  <Database className="h-4 w-4 mr-2" />
-                  Export Complete Database
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Teacher
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Exports */}
-          <Card className="bg-gradient-card shadow-soft border-0">
-            <CardHeader>
-              <CardTitle className="text-education-dark">Recent Exports</CardTitle>
-              <CardDescription>Latest data export history</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {recentExports.map((export_item) => (
-                  <div key={export_item.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+              {showAddTeacher && (
+                <div className="mb-6 p-4 bg-netflix-light-gray/20 rounded-lg border border-netflix-light-gray">
+                  <h4 className="text-netflix-text font-medium mb-3">Add New Teacher</h4>
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <p className="font-medium text-education-dark">{export_item.type}</p>
-                      <p className="text-sm text-muted-foreground">{export_item.date}</p>
+                      <Label htmlFor="teacher-name" className="text-netflix-text">Full Name</Label>
+                      <Input
+                        id="teacher-name"
+                        value={newTeacher.name}
+                        onChange={(e) => setNewTeacher({...newTeacher, name: e.target.value})}
+                        className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
+                      />
                     </div>
-                    <Badge variant="outline" className="text-education-green border-education-green">
-                      {export_item.status}
-                    </Badge>
+                    <div>
+                      <Label htmlFor="teacher-subject" className="text-netflix-text">Subject</Label>
+                      <Input
+                        id="teacher-subject"
+                        value={newTeacher.subject}
+                        onChange={(e) => setNewTeacher({...newTeacher, subject: e.target.value})}
+                        className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="teacher-username" className="text-netflix-text">Username</Label>
+                      <Input
+                        id="teacher-username"
+                        value={newTeacher.username}
+                        onChange={(e) => setNewTeacher({...newTeacher, username: e.target.value})}
+                        className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="teacher-password" className="text-netflix-text">Password</Label>
+                      <Input
+                        id="teacher-password"
+                        type="password"
+                        value={newTeacher.password}
+                        onChange={(e) => setNewTeacher({...newTeacher, password: e.target.value})}
+                        className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <Button 
+                      onClick={handleAddTeacher}
+                      className="bg-netflix-red hover:bg-netflix-red/90 text-white transition-netflix"
+                      size="sm"
+                    >
+                      Add Teacher
+                    </Button>
+                    <Button 
+                      onClick={() => setShowAddTeacher(false)}
+                      variant="outline"
+                      className="border-netflix-light-gray text-netflix-text hover:bg-netflix-light-gray/20"
+                      size="sm"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                {teachersList.map((teacher) => (
+                  <div key={teacher.id} className="flex items-center justify-between p-3 bg-netflix-light-gray/10 rounded-lg border border-netflix-light-gray/30">
+                    <div>
+                      <p className="font-medium text-netflix-text">{teacher.name}</p>
+                      <p className="text-sm text-netflix-muted">{teacher.subject} • {teacher.classes} classes</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-green-400 border-green-400">
+                        Active
+                      </Badge>
+                      <Button size="sm" variant="ghost" className="text-netflix-muted hover:text-netflix-text">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="text-netflix-muted hover:text-red-400">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
+
+          {/* Data Export & Management */}
+          <div className="space-y-6">
+            {/* Data Export */}
+            <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
+              <CardHeader>
+                <CardTitle className="text-netflix-text flex items-center gap-2">
+                  <FileDown className="h-5 w-5" />
+                  Data Export
+                </CardTitle>
+                <CardDescription className="text-netflix-muted">Export attendance data and reports</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button 
+                    onClick={() => handleExportData('Weekly Report')}
+                    className="w-full justify-start bg-netflix-light-gray/20 hover:bg-netflix-light-gray/40 text-netflix-text border border-netflix-light-gray transition-netflix"
+                    variant="outline"
+                  >
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Export Weekly Report
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleExportData('Monthly Analysis')}
+                    className="w-full justify-start bg-netflix-light-gray/20 hover:bg-netflix-light-gray/40 text-netflix-text border border-netflix-light-gray transition-netflix"
+                    variant="outline"
+                  >
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Export Monthly Analysis
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleExportData('Complete Database')}
+                    className="w-full justify-start bg-netflix-light-gray/20 hover:bg-netflix-light-gray/40 text-netflix-text border border-netflix-light-gray transition-netflix"
+                    variant="outline"
+                  >
+                    <Database className="h-4 w-4 mr-2" />
+                    Export Complete Database
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Email Reminders */}
+            <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
+              <CardHeader>
+                <CardTitle className="text-netflix-text flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Email Reminders
+                </CardTitle>
+                <CardDescription className="text-netflix-muted">Send reminders to teachers and staff</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-netflix-muted">
+                    Send automated reminders to teachers about attendance submission deadlines.
+                  </p>
+                  <Button 
+                    onClick={handleSendReminder}
+                    className="bg-netflix-red hover:bg-netflix-red/90 text-white shadow-netflix transition-netflix"
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Send Weekly Reminders
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
-        {/* System Management */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Email Reminders */}
-          <Card className="bg-gradient-card shadow-soft border-0">
-            <CardHeader>
-              <CardTitle className="text-education-dark flex items-center gap-2">
-                <Mail className="h-5 w-5" />
-                Email Reminders
-              </CardTitle>
-              <CardDescription>Send reminders to teachers and staff</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Send automated reminders to teachers about attendance submission deadlines.
-                </p>
-                <Button 
-                  onClick={handleSendReminder}
-                  className="bg-gradient-primary hover:opacity-90 text-white shadow-soft"
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Send Weekly Reminders
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* User Management */}
-          <Card className="bg-gradient-card shadow-soft border-0">
-            <CardHeader>
-              <CardTitle className="text-education-dark flex items-center gap-2">
-                <UserPlus className="h-5 w-5" />
-                User Management
-              </CardTitle>
-              <CardDescription>Manage teacher and admin accounts</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Button 
-                  className="w-full justify-start bg-white hover:bg-gray-50 text-education-dark border shadow-sm"
-                  variant="outline"
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add New Teacher
-                </Button>
-                
-                <Button 
-                  className="w-full justify-start bg-white hover:bg-gray-50 text-education-dark border shadow-sm"
-                  variant="outline"
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Manage Permissions
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Recent Exports */}
+        <Card className="bg-netflix-gray shadow-netflix border border-netflix-light-gray">
+          <CardHeader>
+            <CardTitle className="text-netflix-text">Recent Exports</CardTitle>
+            <CardDescription className="text-netflix-muted">Latest data export history</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {recentExports.map((export_item) => (
+                <div key={export_item.id} className="flex items-center justify-between p-4 bg-netflix-light-gray/10 rounded-lg border border-netflix-light-gray/30">
+                  <div>
+                    <p className="font-medium text-netflix-text">{export_item.type}</p>
+                    <p className="text-sm text-netflix-muted">{export_item.date}</p>
+                  </div>
+                  <Badge variant="outline" className="text-green-400 border-green-400">
+                    {export_item.status}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );

@@ -21,23 +21,18 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login process
+    // Simple admin authentication
     setTimeout(() => {
-      if (username && password) {
+      if (username === 'ADMIN' && password === 'ADMIN') {
         toast({
           title: "Login Successful",
-          description: `Welcome ${role}!`,
+          description: "Welcome Administrator!",
         });
-        
-        if (role === 'teacher') {
-          navigate('/teacher-dashboard');
-        } else {
-          navigate('/principal-dashboard');
-        }
+        navigate('/admin-dashboard');
       } else {
         toast({
           title: "Login Failed",
-          description: "Please enter valid credentials",
+          description: "Invalid credentials. Use ADMIN/ADMIN",
           variant: "destructive",
         });
       }
@@ -46,7 +41,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-education-light to-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         
         {/* Hero Section */}
@@ -67,31 +62,20 @@ const Login = () => {
         </div>
 
         {/* Login Form */}
-        <Card className="w-full max-w-md mx-auto bg-gradient-card shadow-elegant border-0">
+        <Card className="w-full max-w-md mx-auto bg-card shadow-netflix border border-border">
           <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-12 h-12 bg-netflix-red rounded-full flex items-center justify-center mb-4">
               <GraduationCap className="h-6 w-6 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold text-education-dark">Welcome Back</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Sign in to access the attendance management system
+            <CardTitle className="text-2xl font-bold text-netflix-text">Admin Login</CardTitle>
+            <CardDescription className="text-netflix-muted">
+              Use ADMIN/ADMIN to access the system
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="role">Login as</Label>
-                <Select value={role} onValueChange={(value: 'teacher' | 'principal') => setRole(value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="teacher">Teacher</SelectItem>
-                    <SelectItem value="principal">Principal</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Removed role selection - admin only */}
 
               <div className="space-y-2">
                 <Label htmlFor="username">Username</Label>
@@ -127,10 +111,10 @@ const Login = () => {
 
               <Button 
                 type="submit" 
-                className="w-full bg-gradient-primary hover:opacity-90 text-white shadow-soft"
+                className="w-full bg-netflix-red hover:bg-netflix-red/90 text-white shadow-netflix transition-netflix"
                 disabled={isLoading}
               >
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                {isLoading ? 'Signing in...' : 'Admin Login'}
               </Button>
             </form>
           </CardContent>
