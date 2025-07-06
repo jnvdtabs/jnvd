@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,14 +17,16 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simple admin authentication
-    setTimeout(() => {
-      if (username === 'ADMIN' && password === 'ADMIN') {
+    try {
+      const success = await login(username, password);
+      
+      if (success) {
         toast({
           title: "Login Successful",
           description: "Welcome Administrator!",
@@ -36,8 +39,15 @@ const Login = () => {
           variant: "destructive",
         });
       }
+    } catch (error) {
+      toast({
+        title: "Login Error",
+        description: "An error occurred during login. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

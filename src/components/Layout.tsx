@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { GraduationCap, LogOut, Users, BarChart3, Upload } from 'lucide-react';
@@ -11,11 +12,10 @@ interface LayoutProps {
 
 const Layout = ({ children, userRole }: LayoutProps) => {
   const location = useLocation();
-  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    // Handle logout logic here
-    navigate('/login');
+    logout();
   };
 
   const isActive = (path: string) => location.pathname === path;
