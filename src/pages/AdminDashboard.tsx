@@ -4,40 +4,71 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Settings, Users, Database, Mail, FileDown, UserPlus, BookOpen, Plus, Edit, Trash2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Settings, Users, Database, Mail, FileDown, UserPlus, BookOpen, Plus, Edit, Trash2, TestTube } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { dataManager } from '@/lib/dataManager';
+import SystemTester from '@/components/SystemTester';
 
 const AdminDashboard = () => {
   const { toast } = useToast();
   const [showAddTeacher, setShowAddTeacher] = useState(false);
-  const [newTeacher, setNewTeacher] = useState({ name: '', username: '', password: '', subject: '' });
-
-  const systemStats = {
-    totalTeachers: 12,
-    totalClasses: 28,
-    totalSections: 84,
-    totalStudents: 1250
-  };
-
-  const teachersList = [
-    { id: 1, name: 'Dr. Priya Sharma', username: 'priya_math', subject: 'Mathematics', classes: 3 },
-    { id: 2, name: 'Mr. Rajesh Kumar', username: 'rajesh_sci', subject: 'Science', classes: 4 },
-    { id: 3, name: 'Ms. Kavya Nair', username: 'kavya_eng', subject: 'English', classes: 2 },
-    { id: 4, name: 'Mr. Arjun Singh', username: 'arjun_hist', subject: 'History', classes: 3 },
-  ];
-
-  const recentExports = [
+  const [newTeacher, setNewTeacher] = useState({ name: '', username: '', password: '', subject: '', classes: [] });
+  const [systemStats, setSystemStats] = useState(dataManager.getSystemStats());
+  const [teachersList, setTeachersList] = useState(dataManager.getTeachers());
+  const [recentExports, setRecentExports] = useState([
     { id: 1, type: 'Weekly Report', date: '2024-07-01', status: 'completed' },
     { id: 2, type: 'Monthly Analysis', date: '2024-06-30', status: 'completed' },
     { id: 3, type: 'Class-wise Report', date: '2024-06-28', status: 'completed' },
-  ];
+  ]);
+
+  useEffect(() => {
+    // Refresh data when component mounts
+    setSystemStats(dataManager.getSystemStats());
+    setTeachersList(dataManager.getTeachers());
+  }, []);
 
   const handleExportData = (type: string) => {
-    toast({
-      title: "Export Started",
-      description: `${type} export has been initiated. You'll receive an email when ready.`,
-    });
+    try {
+      let csvContent = '';
+      let filename = '';
+      
+      switch (type) {
+        case 'students':
+          csvContent = dataManager.exportToCSV('students');
+          filename = `JNV_Students_${new Date().toISOString().split('T')[0]}.csv`;
+          break;
+        case 'teachers':
+          csvContent = dataManager.exportToCSV('teachers');
+          filename = `JNV_Teachers_${new Date().toISOString().split('T')[0]}.csv`;
+          break;
+        case 'attendance':
+          csvContent = dataManager.exportToCSV('attendance');
+          filename = `JNV_Attendance_${new Date().toISOString().split('T')[0]}.csv`;
+          break;
+        case 'all':
+          csvContent = dataManager.exportToCSV('all');
+          filename = `JNV_Complete_Export_${new Date().toISOString().split('T')[0]}.csv`;
+          break;
+        default:
+          csvContent = dataManager.exportToCSV('all');
+          filename = `JNV_Export_${new Date().toISOString().split('T')[0]}.csv`;
+      }
+      
+      dataManager.downloadCSV(csvContent, filename);
+      
+      toast({
+        title: "Export Complete",
+        description: `${type} data has been exported and downloaded.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: `Error exporting ${type} data. Please try again.`,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSendReminder = () => {
@@ -53,7 +84,7 @@ const AdminDashboard = () => {
         title: "Teacher Added",
         description: `${newTeacher.name} has been added successfully.`,
       });
-      setNewTeacher({ name: '', username: '', password: '', subject: '' });
+      setNewTeacher({ name: '', username: '', password: '', subject: '', classes: [] });
       setShowAddTeacher(false);
     }
   };
@@ -109,8 +140,8 @@ const AdminDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-netflix-muted">Total Sections</p>
-                  <p className="text-2xl font-bold text-netflix-text">{systemStats.totalSections}</p>
+                  <p className="text-sm font-medium text-netflix-muted">Attendance Records</p>
+                  <p className="text-2xl font-bold text-netflix-text">{systemStats.totalAttendanceRecords}</p>
                 </div>
                 <Database className="h-8 w-8 text-purple-500" />
               </div>

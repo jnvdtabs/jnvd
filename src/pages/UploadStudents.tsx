@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { dataManager } from '@/lib/dataManager';
 
 const UploadStudents = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -19,10 +20,10 @@ const UploadStudents = () => {
     if (!file) return;
 
     // Validate file type
-    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls') && !file.name.endsWith('.csv')) {
       toast({
         title: "Invalid File Type",
-        description: "Please upload an Excel file (.xlsx or .xls)",
+        description: "Please upload an Excel file (.xlsx, .xls) or CSV file",
         variant: "destructive",
       });
       return;
@@ -33,22 +34,104 @@ const UploadStudents = () => {
     setUploadProgress(0);
     setUploadStatus('idle');
 
+    // Process the uploaded file
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+        if (file.name.endsWith('.csv')) {
+          // Process CSV file
+          const lines = text.split('\n').filter(line => line.trim());
+          const headers = lines[0].split(',').map(h => h.trim());
+          
+          // Validate headers
+          const requiredHeaders = ['Roll No', 'Student Name', 'Class', 'Section'];
+          const hasValidHeaders = requiredHeaders.every(header => 
+            headers.some(h => h.toLowerCase().includes(header.toLowerCase()))
+          );
+          
+          if (!hasValidHeaders) {
+            setUploadStatus('error');
+            toast({
+              title: "Invalid File Format",
+              description: "CSV must contain columns: Roll No, Student Name, Class, Section",
+              variant: "destructive",
+            });
+            return;
+          }
+          
+          // Process student data
+          const students = [];
+          for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(v => v.trim());
+            if (values.length >= 4 && values[0] && values[1]) {
+              const student = {
+                rollNo: values[0],
+                name: values[1],
+                class: values[2],
+                section: values[3]
+              };
+              
+              // Validate student data
+              const errors = dataManager.validateStudentData(student);
+              if (errors.length === 0) {
+                students.push(student);
+              }
+            }
+          }
+          
+          // Add students to database
+          if (students.length > 0) {
+            dataManager.addMultipleStudents(students);
+            setUploadStatus('success');
+            toast({
+              title: "Upload Successful",
+              description: `${students.length} students added to the system.`,
+            });
+          } else {
+            setUploadStatus('error');
+            toast({
+              title: "No Valid Data",
+              description: "No valid student records found in the file.",
+              variant: "destructive",
+            });
+          }
+        }
+      } catch (error) {
+        setUploadStatus('error');
+        toast({
+          title: "Processing Error",
+          description: "Error processing the uploaded file.",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    reader.onerror = () => {
+      setUploadStatus('error');
+      toast({
+        title: "File Read Error",
+        description: "Error reading the uploaded file.",
+        variant: "destructive",
+      });
+    };
+
     // Simulate upload progress
     const interval = setInterval(() => {
       setUploadProgress(prev => {
-        if (prev >= 100) {
+        if (prev >= 90) {
           clearInterval(interval);
-          setIsUploading(false);
-          setUploadStatus('success');
-          toast({
-            title: "Upload Successful",
-            description: `${file.name} has been uploaded successfully.`,
-          });
+          reader.readAsText(file);
           return 100;
         }
         return prev + 10;
       });
-    }, 200);
+    }, 100);
+
+    // Set final status after processing
+    setTimeout(() => {
+      setIsUploading(false);
+    }, 1500);
   };
 
   const downloadTemplate = () => {
