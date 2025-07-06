@@ -4,17 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, Users, Database, Mail, FileDown, UserPlus, BookOpen, Plus, Edit, Trash2, TestTube } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import { dataManager } from '@/lib/dataManager';
-import SystemTester from '@/components/SystemTester';
 
 const AdminDashboard = () => {
   const { toast } = useToast();
   const [showAddTeacher, setShowAddTeacher] = useState(false);
-  const [newTeacher, setNewTeacher] = useState({ name: '', username: '', password: '', subject: '', classes: [] });
+  const [newTeacher, setNewTeacher] = useState({ 
+    name: '', 
+    username: '', 
+    password: '', 
+    subject: '', 
+    classes: ['8-A'] 
+  });
   const [systemStats, setSystemStats] = useState(dataManager.getSystemStats());
   const [teachersList, setTeachersList] = useState(dataManager.getTeachers());
   const [recentExports, setRecentExports] = useState([
@@ -79,13 +83,117 @@ const AdminDashboard = () => {
   };
 
   const handleAddTeacher = () => {
-    if (newTeacher.name && newTeacher.username && newTeacher.password) {
+    try {
+      if (!newTeacher.name.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Teacher name is required.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!newTeacher.username.trim()) {
+        toast({
+          title: "Validation Error", 
+          description: "Username is required.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!newTeacher.password.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Password is required.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!newTeacher.subject.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Subject is required.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate teacher data
+      const validationErrors = dataManager.validateTeacherData(newTeacher);
+      if (validationErrors.length > 0) {
+        toast({
+          title: "Validation Error",
+          description: validationErrors.join(', '),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Add teacher to database
+      const addedTeacher = dataManager.addTeacher(newTeacher);
+      
+      // Update local state
+      setTeachersList(dataManager.getTeachers());
+      setSystemStats(dataManager.getSystemStats());
+      
       toast({
         title: "Teacher Added",
-        description: `${newTeacher.name} has been added successfully.`,
+        description: `${addedTeacher.name} has been added successfully.`,
       });
-      setNewTeacher({ name: '', username: '', password: '', subject: '', classes: [] });
+      
+      // Reset form
+      setNewTeacher({ 
+        name: '', 
+        username: '', 
+        password: '', 
+        subject: '', 
+        classes: ['8-A'] 
+      });
       setShowAddTeacher(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to add teacher: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteTeacher = (teacherId: string, teacherName: string) => {
+    try {
+      // Don't allow deleting the admin user
+      if (teacherId === 'admin-001') {
+        toast({
+          title: "Cannot Delete",
+          description: "Cannot delete the system administrator account.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const deleted = dataManager.deleteTeacher(teacherId);
+      if (deleted) {
+        setTeachersList(dataManager.getTeachers());
+        setSystemStats(dataManager.getSystemStats());
+        toast({
+          title: "Teacher Deleted",
+          description: `${teacherName} has been removed from the system.`,
+        });
+      } else {
+        toast({
+          title: "Delete Failed",
+          description: "Failed to delete teacher.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to delete teacher: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+      });
     }
   };
 
@@ -141,7 +249,7 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-netflix-muted">Attendance Records</p>
-                  <p className="text-2xl font-bold text-netflix-text">{systemStats.totalAttendanceRecords}</p>
+                  <p className="text-2xl font-bold text-netflix-text">{systemStats.totalAttendanceRecords || 0}</p>
                 </div>
                 <Database className="h-8 w-8 text-purple-500" />
               </div>
@@ -183,6 +291,7 @@ const AdminDashboard = () => {
                         value={newTeacher.name}
                         onChange={(e) => setNewTeacher({...newTeacher, name: e.target.value})}
                         className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
+                        placeholder="Enter full name"
                       />
                     </div>
                     <div>
@@ -192,6 +301,7 @@ const AdminDashboard = () => {
                         value={newTeacher.subject}
                         onChange={(e) => setNewTeacher({...newTeacher, subject: e.target.value})}
                         className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
+                        placeholder="Enter subject"
                       />
                     </div>
                     <div>
@@ -201,6 +311,7 @@ const AdminDashboard = () => {
                         value={newTeacher.username}
                         onChange={(e) => setNewTeacher({...newTeacher, username: e.target.value})}
                         className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
+                        placeholder="Enter username"
                       />
                     </div>
                     <div>
@@ -211,6 +322,7 @@ const AdminDashboard = () => {
                         value={newTeacher.password}
                         onChange={(e) => setNewTeacher({...newTeacher, password: e.target.value})}
                         className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
+                        placeholder="Enter password"
                       />
                     </div>
                   </div>
@@ -239,18 +351,22 @@ const AdminDashboard = () => {
                   <div key={teacher.id} className="flex items-center justify-between p-3 bg-netflix-light-gray/10 rounded-lg border border-netflix-light-gray/30">
                     <div>
                       <p className="font-medium text-netflix-text">{teacher.name}</p>
-                      <p className="text-sm text-netflix-muted">{teacher.subject} • {teacher.classes} classes</p>
+                      <p className="text-sm text-netflix-muted">{teacher.subject} • {teacher.classes.join(', ')}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="text-green-400 border-green-400">
                         Active
                       </Badge>
-                      <Button size="sm" variant="ghost" className="text-netflix-muted hover:text-netflix-text">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" className="text-netflix-muted hover:text-red-400">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {teacher.id !== 'admin-001' && (
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-netflix-muted hover:text-red-400"
+                          onClick={() => handleDeleteTeacher(teacher.id, teacher.name)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -272,25 +388,25 @@ const AdminDashboard = () => {
               <CardContent>
                 <div className="space-y-3">
                   <Button 
-                    onClick={() => handleExportData('Weekly Report')}
+                    onClick={() => handleExportData('students')}
                     className="w-full justify-start bg-netflix-light-gray/20 hover:bg-netflix-light-gray/40 text-netflix-text border border-netflix-light-gray transition-netflix"
                     variant="outline"
                   >
                     <FileDown className="h-4 w-4 mr-2" />
-                    Export Weekly Report
+                    Export Students Data
                   </Button>
                   
                   <Button 
-                    onClick={() => handleExportData('Monthly Analysis')}
+                    onClick={() => handleExportData('teachers')}
                     className="w-full justify-start bg-netflix-light-gray/20 hover:bg-netflix-light-gray/40 text-netflix-text border border-netflix-light-gray transition-netflix"
                     variant="outline"
                   >
                     <FileDown className="h-4 w-4 mr-2" />
-                    Export Monthly Analysis
+                    Export Teachers Data
                   </Button>
                   
                   <Button 
-                    onClick={() => handleExportData('Complete Database')}
+                    onClick={() => handleExportData('all')}
                     className="w-full justify-start bg-netflix-light-gray/20 hover:bg-netflix-light-gray/40 text-netflix-text border border-netflix-light-gray transition-netflix"
                     variant="outline"
                   >
