@@ -1,20 +1,20 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useAuth();
+  const { user, loading } = useSupabaseAuth();
 
   useEffect(() => {
     if (loading) return; // Wait for auth to load
     
-    if (isAuthenticated) {
+    if (user) {
       navigate('/admin-dashboard', { replace: true });
     } else {
-      navigate('/login', { replace: true });
+      navigate('/auth', { replace: true });
     }
-  }, [navigate, isAuthenticated, loading]);
+  }, [navigate, user, loading]);
 
   // Show loading while checking auth
   if (loading) {

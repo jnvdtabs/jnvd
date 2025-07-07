@@ -7,20 +7,35 @@ import { Label } from '@/components/ui/label';
 import { Settings, Users, Database, Mail, FileDown, UserPlus, BookOpen, Plus, Edit, Trash2, TestTube } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
-import { dataManager } from '@/lib/dataManager';
+import { useDatabase } from '@/hooks/useDatabase';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 
 const AdminDashboard = () => {
   const { toast } = useToast();
+  const { signOut } = useSupabaseAuth();
+  const { 
+    students, 
+    teachers, 
+    loading, 
+    addTeacher, 
+    getSystemStats 
+  } = useDatabase();
+  
   const [showAddTeacher, setShowAddTeacher] = useState(false);
   const [newTeacher, setNewTeacher] = useState({ 
-    name: '', 
-    username: '', 
+    email: '', 
     password: '', 
+    full_name: '', 
+    role: 'teacher' as 'teacher' | 'principal',
     subject: '', 
-    classes: ['8-A'] 
+    department: ''
   });
-  const [systemStats, setSystemStats] = useState(dataManager.getSystemStats());
-  const [teachersList, setTeachersList] = useState(dataManager.getTeachers());
+  const [systemStats, setSystemStats] = useState({
+    totalStudents: 0,
+    totalTeachers: 0,
+    totalClasses: 0,
+    lastUpdated: new Date().toISOString()
+  });
   const [recentExports, setRecentExports] = useState([
     { id: 1, type: 'Weekly Report', date: '2024-07-01', status: 'completed' },
     { id: 2, type: 'Monthly Analysis', date: '2024-06-30', status: 'completed' },
@@ -28,39 +43,67 @@ const AdminDashboard = () => {
   ]);
 
   useEffect(() => {
-    // Refresh data when component mounts
-    setSystemStats(dataManager.getSystemStats());
-    setTeachersList(dataManager.getTeachers());
-  }, []);
+    // Load system stats when data changes
+    const loadStats = async () => {
+      const stats = await getSystemStats();
+      if (stats) {
+        setSystemStats(stats);
+      }
+    };
+    
+    if (students.length > 0 || teachers.length > 0) {
+      loadStats();
+    }
+  }, [students, teachers, getSystemStats]);
+
+  const exportToCSV = (data: any[], headers: string[], filename: string) => {
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row => headers.map(header => `"${row[header] || ''}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  };
 
   const handleExportData = (type: string) => {
     try {
-      let csvContent = '';
-      let filename = '';
+      const date = new Date().toISOString().split('T')[0];
       
       switch (type) {
         case 'students':
-          csvContent = dataManager.exportToCSV('students');
-          filename = `JNV_Students_${new Date().toISOString().split('T')[0]}.csv`;
+          exportToCSV(
+            students, 
+            ['roll_no', 'full_name', 'class', 'section', 'created_at'],
+            `JNV_Students_${date}.csv`
+          );
           break;
         case 'teachers':
-          csvContent = dataManager.exportToCSV('teachers');
-          filename = `JNV_Teachers_${new Date().toISOString().split('T')[0]}.csv`;
-          break;
-        case 'attendance':
-          csvContent = dataManager.exportToCSV('attendance');
-          filename = `JNV_Attendance_${new Date().toISOString().split('T')[0]}.csv`;
+          exportToCSV(
+            teachers, 
+            ['full_name', 'role', 'subject', 'department', 'created_at'],
+            `JNV_Teachers_${date}.csv`
+          );
           break;
         case 'all':
-          csvContent = dataManager.exportToCSV('all');
-          filename = `JNV_Complete_Export_${new Date().toISOString().split('T')[0]}.csv`;
+          // Export both students and teachers in one file
+          const allData = [
+            ...students.map(s => ({ ...s, type: 'student' })),
+            ...teachers.map(t => ({ ...t, type: 'teacher' }))
+          ];
+          exportToCSV(
+            allData,
+            ['type', 'full_name', 'roll_no', 'role', 'class', 'section', 'subject', 'department', 'created_at'],
+            `JNV_Complete_Export_${date}.csv`
+          );
           break;
-        default:
-          csvContent = dataManager.exportToCSV('all');
-          filename = `JNV_Export_${new Date().toISOString().split('T')[0]}.csv`;
       }
-      
-      dataManager.downloadCSV(csvContent, filename);
       
       toast({
         title: "Export Complete",
@@ -82,21 +125,21 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleAddTeacher = () => {
+  const handleAddTeacher = async () => {
     try {
-      if (!newTeacher.name.trim()) {
+      if (!newTeacher.email.trim()) {
         toast({
           title: "Validation Error",
-          description: "Teacher name is required.",
+          description: "Email is required.",
           variant: "destructive",
         });
         return;
       }
 
-      if (!newTeacher.username.trim()) {
+      if (!newTeacher.full_name.trim()) {
         toast({
           title: "Validation Error", 
-          description: "Username is required.",
+          description: "Full name is required.",
           variant: "destructive",
         });
         return;
@@ -111,45 +154,22 @@ const AdminDashboard = () => {
         return;
       }
 
-      if (!newTeacher.subject.trim()) {
-        toast({
-          title: "Validation Error",
-          description: "Subject is required.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Validate teacher data
-      const validationErrors = dataManager.validateTeacherData(newTeacher);
-      if (validationErrors.length > 0) {
-        toast({
-          title: "Validation Error",
-          description: validationErrors.join(', '),
-          variant: "destructive",
-        });
-        return;
-      }
-
       // Add teacher to database
-      const addedTeacher = dataManager.addTeacher(newTeacher);
-      
-      // Update local state
-      setTeachersList(dataManager.getTeachers());
-      setSystemStats(dataManager.getSystemStats());
+      await addTeacher(newTeacher);
       
       toast({
         title: "Teacher Added",
-        description: `${addedTeacher.name} has been added successfully.`,
+        description: `${newTeacher.full_name} has been added successfully. They will receive an email to verify their account.`,
       });
       
       // Reset form
       setNewTeacher({ 
-        name: '', 
-        username: '', 
+        email: '', 
         password: '', 
+        full_name: '', 
+        role: 'teacher',
         subject: '', 
-        classes: ['8-A'] 
+        department: ''
       });
       setShowAddTeacher(false);
     } catch (error) {
@@ -161,40 +181,12 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteTeacher = (teacherId: string, teacherName: string) => {
-    try {
-      // Don't allow deleting the admin user
-      if (teacherId === 'admin-001') {
-        toast({
-          title: "Cannot Delete",
-          description: "Cannot delete the system administrator account.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const deleted = dataManager.deleteTeacher(teacherId);
-      if (deleted) {
-        setTeachersList(dataManager.getTeachers());
-        setSystemStats(dataManager.getSystemStats());
-        toast({
-          title: "Teacher Deleted",
-          description: `${teacherName} has been removed from the system.`,
-        });
-      } else {
-        toast({
-          title: "Delete Failed",
-          description: "Failed to delete teacher.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: `Failed to delete teacher: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        variant: "destructive",
-      });
-    }
+  const handleDeleteTeacher = async (teacherId: string, teacherName: string) => {
+    toast({
+      title: "Feature Not Available",
+      description: "Teacher deletion will be implemented in a future update.",
+      variant: "destructive",
+    });
   };
 
   return (
@@ -249,7 +241,7 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-netflix-muted">Attendance Records</p>
-                  <p className="text-2xl font-bold text-netflix-text">{systemStats.totalAttendanceRecords || 0}</p>
+                  <p className="text-2xl font-bold text-netflix-text">0</p>
                 </div>
                 <Database className="h-8 w-8 text-purple-500" />
               </div>
@@ -288,10 +280,21 @@ const AdminDashboard = () => {
                       <Label htmlFor="teacher-name" className="text-netflix-text">Full Name</Label>
                       <Input
                         id="teacher-name"
-                        value={newTeacher.name}
-                        onChange={(e) => setNewTeacher({...newTeacher, name: e.target.value})}
+                        value={newTeacher.full_name}
+                        onChange={(e) => setNewTeacher({...newTeacher, full_name: e.target.value})}
                         className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
                         placeholder="Enter full name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="teacher-email" className="text-netflix-text">Email</Label>
+                      <Input
+                        id="teacher-email"
+                        type="email"
+                        value={newTeacher.email}
+                        onChange={(e) => setNewTeacher({...newTeacher, email: e.target.value})}
+                        className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
+                        placeholder="Enter email"
                       />
                     </div>
                     <div>
@@ -302,16 +305,6 @@ const AdminDashboard = () => {
                         onChange={(e) => setNewTeacher({...newTeacher, subject: e.target.value})}
                         className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
                         placeholder="Enter subject"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="teacher-username" className="text-netflix-text">Username</Label>
-                      <Input
-                        id="teacher-username"
-                        value={newTeacher.username}
-                        onChange={(e) => setNewTeacher({...newTeacher, username: e.target.value})}
-                        className="bg-netflix-dark border-netflix-light-gray text-netflix-text"
-                        placeholder="Enter username"
                       />
                     </div>
                     <div>
@@ -347,26 +340,24 @@ const AdminDashboard = () => {
               )}
 
               <div className="space-y-3">
-                {teachersList.map((teacher) => (
+                {teachers.map((teacher) => (
                   <div key={teacher.id} className="flex items-center justify-between p-3 bg-netflix-light-gray/10 rounded-lg border border-netflix-light-gray/30">
                     <div>
-                      <p className="font-medium text-netflix-text">{teacher.name}</p>
-                      <p className="text-sm text-netflix-muted">{teacher.subject} • {teacher.classes.join(', ')}</p>
+                      <p className="font-medium text-netflix-text">{teacher.full_name}</p>
+                      <p className="text-sm text-netflix-muted">{teacher.role} • {teacher.subject || 'No subject'}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="text-green-400 border-green-400">
                         Active
                       </Badge>
-                      {teacher.id !== 'admin-001' && (
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-netflix-muted hover:text-red-400"
-                          onClick={() => handleDeleteTeacher(teacher.id, teacher.name)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="text-netflix-muted hover:text-red-400"
+                        onClick={() => handleDeleteTeacher(teacher.id, teacher.full_name)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -412,6 +403,15 @@ const AdminDashboard = () => {
                   >
                     <Database className="h-4 w-4 mr-2" />
                     Export Complete Database
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => signOut()}
+                    className="w-full justify-start bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-600/30 transition-netflix"
+                    variant="outline"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Sign Out
                   </Button>
                 </div>
               </CardContent>

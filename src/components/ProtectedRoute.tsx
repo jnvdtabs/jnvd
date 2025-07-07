@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,22 +8,17 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
-  const { isAuthenticated, userRole, loading } = useAuth();
+  const { user, loading } = useSupabaseAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (loading) return; // Wait for auth state to load
 
-    if (!isAuthenticated) {
-      navigate('/login', { replace: true });
+    if (!user) {
+      navigate('/auth', { replace: true });
       return;
     }
-
-    if (requiredRole && userRole !== requiredRole) {
-      navigate('/login', { replace: true });
-      return;
-    }
-  }, [isAuthenticated, userRole, requiredRole, navigate, loading]);
+  }, [user, navigate, loading]);
 
   // Show loading while checking auth
   if (loading) {
@@ -37,11 +32,7 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  if (requiredRole && userRole !== requiredRole) {
+  if (!user) {
     return null;
   }
 
