@@ -189,13 +189,85 @@ export const useDatabase = () => {
     return errors;
   };
 
+  // Get pending approvals (admin only)
+  const getPendingApprovals = async () => {
+    if (!session) return [];
+    
+    const { data, error } = await supabase
+      .from('pending_approvals')
+      .select('*')
+      .eq('processed', false)
+      .order('requested_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching pending approvals:', error);
+      return [];
+    }
+    
+    return data || [];
+  };
+
+  // Approve user (admin only)
+  const approveUser = async (profileId: string) => {
+    if (!session) throw new Error('Not authenticated');
+    
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ approved: true })
+      .eq('id', profileId);
+    
+    if (profileError) throw profileError;
+    
+    const { error: approvalError } = await supabase
+      .from('pending_approvals')
+      .update({ processed: true })
+      .eq('profile_id', profileId);
+    
+    if (approvalError) throw approvalError;
+  };
+
+  // Reject user (admin only)
+  const rejectUser = async (profileId: string) => {
+    if (!session) throw new Error('Not authenticated');
+    
+    const { error: approvalError } = await supabase
+      .from('pending_approvals')
+      .update({ processed: true })
+      .eq('profile_id', profileId);
+    
+    if (approvalError) throw approvalError;
+    
+    // Optionally delete the profile
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', profileId);
+    
+    if (profileError) throw profileError;
+  };
+
+  // Send admin notification email
+  const sendAdminNotification = async (userEmail: string, fullName: string, role: string, profileId: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('notify-admin-new-user', {
+        body: { userEmail, fullName, role, profileId }
+      });
+      
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error sending admin notification:', error);
+      // Don't throw error - registration should still work even if email fails
+    }
+  };
+
   // Get system stats
   const getSystemStats = async () => {
     if (!session) return null;
     
-    const [studentsCount, teachersCount] = await Promise.all([
+    const [studentsCount, teachersCount, pendingCount] = await Promise.all([
       supabase.from('students').select('id', { count: 'exact', head: true }),
-      supabase.from('profiles').select('id', { count: 'exact', head: true })
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('approved', true),
+      supabase.from('pending_approvals').select('id', { count: 'exact', head: true }).eq('processed', false)
     ]);
     
     const classes = [...new Set(students.map(s => `${s.class}-${s.section}`))];
@@ -204,6 +276,7 @@ export const useDatabase = () => {
       totalStudents: studentsCount.count || 0,
       totalTeachers: teachersCount.count || 0,
       totalClasses: classes.length,
+      pendingApprovals: pendingCount.count || 0,
       lastUpdated: new Date().toISOString()
     };
   };
@@ -227,6 +300,10 @@ export const useDatabase = () => {
     validateStudentData,
     getCurrentUserProfile,
     getSystemStats,
+    getPendingApprovals,
+    approveUser,
+    rejectUser,
+    sendAdminNotification,
     fetchStudents,
     fetchTeachers
   };

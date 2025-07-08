@@ -59,35 +59,88 @@ export type Database = {
           },
         ]
       }
+      pending_approvals: {
+        Row: {
+          full_name: string
+          id: string
+          processed: boolean | null
+          profile_id: string
+          requested_at: string
+          role: string
+          user_email: string
+        }
+        Insert: {
+          full_name: string
+          id?: string
+          processed?: boolean | null
+          profile_id: string
+          requested_at?: string
+          role: string
+          user_email: string
+        }
+        Update: {
+          full_name?: string
+          id?: string
+          processed?: boolean | null
+          profile_id?: string
+          requested_at?: string
+          role?: string
+          user_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_approvals_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          approved: boolean | null
+          class_strength: number | null
+          class_teacher_class: string | null
+          class_teacher_section: string | null
           classes: string[] | null
           created_at: string | null
           department: string | null
           full_name: string
           id: string
+          quiz_completed: boolean | null
           role: string
           subject: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          approved?: boolean | null
+          class_strength?: number | null
+          class_teacher_class?: string | null
+          class_teacher_section?: string | null
           classes?: string[] | null
           created_at?: string | null
           department?: string | null
           full_name: string
           id?: string
+          quiz_completed?: boolean | null
           role: string
           subject?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          approved?: boolean | null
+          class_strength?: number | null
+          class_teacher_class?: string | null
+          class_teacher_section?: string | null
           classes?: string[] | null
           created_at?: string | null
           department?: string | null
           full_name?: string
           id?: string
+          quiz_completed?: boolean | null
           role?: string
           subject?: string | null
           updated_at?: string | null

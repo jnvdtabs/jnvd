@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GraduationCap, User, Lock, Mail, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useDatabase } from '@/hooks/useDatabase';
 
 const AuthPage = () => {
   const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -27,6 +28,7 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signIn, signUp, user, loading } = useSupabaseAuth();
+  const { sendAdminNotification } = useDatabase();
 
   // Redirect if already authenticated
   if (!loading && user) {
@@ -102,10 +104,19 @@ const AuthPage = () => {
           variant: "destructive",
         });
       } else {
+        // Send admin notification email
+        await sendAdminNotification(
+          signupData.email,
+          signupData.full_name,
+          signupData.role,
+          '' // Profile ID will be set by the database trigger
+        );
+
         toast({
           title: "Account Created",
-          description: "Please check your email to verify your account.",
+          description: "Please check your email to verify your account. Your registration is pending admin approval.",
         });
+        
         // Reset form
         setSignupData({
           email: '',

@@ -13,6 +13,8 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import PrincipalDashboard from "./pages/PrincipalDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import UploadStudents from "./pages/UploadStudents";
+import WaitingApproval from "./pages/WaitingApproval";
+import Quiz from "./pages/Quiz";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,16 @@ const App = () => (
             <Route path="/upload-students" element={
               <ProtectedRoute>
                 <UploadStudents />
+              </ProtectedRoute>
+            } />
+            <Route path="/waiting-approval" element={
+              <ProtectedRoute>
+                <WaitingApproval />
+              </ProtectedRoute>
+            } />
+            <Route path="/quiz" element={
+              <ProtectedRoute>
+                <Quiz />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
