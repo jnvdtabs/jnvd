@@ -264,21 +264,32 @@ export const useDatabase = () => {
   const getSystemStats = async () => {
     if (!session) return null;
     
-    const [studentsCount, teachersCount, pendingCount] = await Promise.all([
-      supabase.from('students').select('id', { count: 'exact', head: true }),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('approved', true),
-      supabase.from('pending_approvals').select('id', { count: 'exact', head: true }).eq('processed', false)
-    ]);
-    
-    const classes = [...new Set(students.map(s => `${s.class}-${s.section}`))];
-    
-    return {
-      totalStudents: studentsCount.count || 0,
-      totalTeachers: teachersCount.count || 0,
-      totalClasses: classes.length,
-      pendingApprovals: pendingCount.count || 0,
-      lastUpdated: new Date().toISOString()
-    };
+    try {
+      const [studentsCount, teachersCount, pendingCount] = await Promise.all([
+        supabase.from('students').select('id', { count: 'exact', head: true }),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('approved', true),
+        supabase.from('pending_approvals').select('id', { count: 'exact', head: true }).eq('processed', false)
+      ]);
+      
+      const classes = [...new Set(students.map(s => `${s.class}-${s.section}`))];
+      
+      return {
+        totalStudents: studentsCount.count || 0,
+        totalTeachers: teachersCount.count || 0,
+        totalClasses: classes.length,
+        pendingApprovals: pendingCount.count || 0,
+        lastUpdated: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('Error fetching system stats:', error);
+      return {
+        totalStudents: 0,
+        totalTeachers: 0,
+        totalClasses: 0,
+        pendingApprovals: 0,
+        lastUpdated: new Date().toISOString()
+      };
+    }
   };
 
   // Load data when user session changes

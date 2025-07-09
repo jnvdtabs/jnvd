@@ -19,7 +19,9 @@ const AdminDashboard = () => {
     teachers, 
     loading, 
     addTeacher, 
-    getSystemStats 
+    getSystemStats,
+    fetchStudents,
+    fetchTeachers 
   } = useDatabase();
   
   const [showAddTeacher, setShowAddTeacher] = useState(false);
@@ -52,10 +54,11 @@ const AdminDashboard = () => {
       }
     };
     
-    if (students.length > 0 || teachers.length > 0) {
-      loadStats();
-    }
-  }, [students, teachers, getSystemStats]);
+    // Always load initial data
+    fetchStudents();
+    fetchTeachers();
+    loadStats();
+  }, [getSystemStats, fetchStudents, fetchTeachers]);
 
   const exportToCSV = (data: any[], headers: string[], filename: string) => {
     const csvContent = [

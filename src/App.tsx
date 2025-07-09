@@ -7,7 +7,6 @@ import { SupabaseAuthProvider } from "@/hooks/useSupabaseAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
 import AuthPage from "./pages/AuthPage";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import PrincipalDashboard from "./pages/PrincipalDashboard";
@@ -27,7 +26,6 @@ const App = () => (
         <SupabaseAuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/teacher-dashboard" element={
               <ProtectedRoute>
