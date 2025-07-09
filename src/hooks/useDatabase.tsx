@@ -249,11 +249,17 @@ export const useDatabase = () => {
   // Send admin notification email
   const sendAdminNotification = async (userEmail: string, fullName: string, role: string, profileId: string) => {
     try {
-      const { error } = await supabase.functions.invoke('notify-admin-new-user', {
+      console.log('Sending admin notification for:', { userEmail, fullName, role, profileId });
+      const { data, error } = await supabase.functions.invoke('notify-admin-new-user', {
         body: { userEmail, fullName, role, profileId }
       });
       
-      if (error) throw error;
+      console.log('Admin notification response:', { data, error });
+      
+      if (error) {
+        console.error('Error from edge function:', error);
+        throw error;
+      }
     } catch (error) {
       console.error('Error sending admin notification:', error);
       // Don't throw error - registration should still work even if email fails

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { GraduationCap, LogOut, Users, BarChart3, Upload } from 'lucide-react';
@@ -12,10 +12,10 @@ interface LayoutProps {
 
 const Layout = ({ children, userRole }: LayoutProps) => {
   const location = useLocation();
-  const { logout } = useAuth();
+  const { signOut } = useSupabaseAuth();
 
   const handleLogout = () => {
-    logout();
+    signOut();
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -36,7 +36,7 @@ const Layout = ({ children, userRole }: LayoutProps) => {
 
             {userRole && (
               <div className="flex items-center space-x-4">
-                <span className="text-netflix-text capitalize">Welcome, Administrator</span>
+                <span className="text-netflix-text capitalize">Welcome, {userRole}</span>
                 <Button 
                   variant="outline" 
                   size="sm" 

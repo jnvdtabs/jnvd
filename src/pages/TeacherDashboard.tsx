@@ -49,7 +49,7 @@ const TeacherDashboard = () => {
   };
 
   return (
-    <Layout userRole="admin">
+    <Layout userRole="teacher">
       <div className="space-y-6">
         {/* Header */}
         <div>
