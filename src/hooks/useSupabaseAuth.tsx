@@ -41,16 +41,52 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
   const signUp = async (email: string, password: string, userData: { full_name: string; role: string; department?: string; subject?: string }) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: userData
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: userData
+        }
+      });
+      
+      // If signup successful and not admin, trigger email notification
+      if (!error && userData.role !== 'admin' && data.user) {
+        console.log('Triggering admin notification for new user:', userData);
+        
+        // Small delay to ensure profile is created by trigger
+        setTimeout(async () => {
+          try {
+            // Get the profile ID
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('user_id', data.user!.id)
+              .single();
+              
+            if (profile) {
+              await supabase.functions.invoke('notify-admin-new-user', {
+                body: { 
+                  userEmail: email, 
+                  fullName: userData.full_name, 
+                  role: userData.role, 
+                  profileId: profile.id 
+                }
+              });
+              console.log('Admin notification sent successfully');
+            }
+          } catch (notificationError) {
+            console.error('Failed to send admin notification:', notificationError);
+            // Don't fail the signup if email fails
+          }
+        }, 2000);
       }
-    });
-    
-    return { error };
+      
+      return { error };
+    } catch (err) {
+      return { error: err };
+    }
   };
 
   const signIn = async (email: string, password: string) => {

@@ -148,20 +148,31 @@ export const useDatabase = () => {
 
   // Get current user profile
   const getCurrentUserProfile = async () => {
-    if (!user) return null;
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-    
-    if (error) {
-      console.error('Error fetching user profile:', error);
+    if (!user) {
+      console.log('No user in getCurrentUserProfile');
       return null;
     }
     
-    return data;
+    console.log('Fetching profile for user:', user.id);
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+      }
+      
+      console.log('Profile fetched successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('Exception in getCurrentUserProfile:', error);
+      return null;
+    }
   };
 
   // Validate student data

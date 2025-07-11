@@ -1,5 +1,6 @@
 import Layout from '@/components/Layout';
 import PendingApprovals from '@/components/PendingApprovals';
+import SystemTester from '@/components/SystemTester';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -46,15 +47,24 @@ const AdminDashboard = () => {
   ]);
 
   useEffect(() => {
+    console.log('AdminDashboard useEffect triggered');
+    
     // Load system stats when data changes
     const loadStats = async () => {
-      const stats = await getSystemStats();
-      if (stats) {
-        setSystemStats(stats);
+      try {
+        console.log('Loading system stats...');
+        const stats = await getSystemStats();
+        console.log('System stats loaded:', stats);
+        if (stats) {
+          setSystemStats(stats);
+        }
+      } catch (error) {
+        console.error('Error loading system stats:', error);
       }
     };
     
     // Always load initial data
+    console.log('Fetching students and teachers...');
     fetchStudents();
     fetchTeachers();
     loadStats();
@@ -252,6 +262,9 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* System Diagnostics */}
+        <SystemTester />
 
         {/* Pending Approvals */}
         <PendingApprovals />
